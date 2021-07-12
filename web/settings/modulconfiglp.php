@@ -791,23 +791,10 @@
 										</div>
 									</div>
 									<div class="form-row mb-1">
-										<label for="soc_tesla_password" class="col-md-4 col-form-label">Passwort</label>
+										<label for="soc_tesla_login_btn" class="col-md-4 col-form-label">Anmeldedaten prüfen</label>
 										<div class="col">
-											<input class="form-control" type="password" name="soc_tesla_password" id="soc_tesla_password" value="<?php echo $soc_tesla_passwordold ?>">
-											<span class="form-text small">
-												Password des Tesla Logins. Das Passwort wird nur bei der ersten Einrichtung verwendet. Sobald die Anmeldung erfolgreich war, wird die Anmeldung über Token geregelt und das Passwort durch "#TokenInUse#" ersetzt.<br>
-												Wird bei Tesla direkt das Passwort geändert, kann die WB sich nicht mehr anmelden und es muss hier wieder einmalig das aktuelle Passwort eingetragen werden.<br>
-												Wenn das Eingabefeld geleert wird, dann werden auch die Anmeldetoken komplett entfernt.
-											</span>
-										</div>
-									</div>
-									<div class="form-row mb-1">
-										<label for="soc_tesla_mfapasscode" class="col-md-4 col-form-label">MFA-PassCode</label>
-										<div class="col">
-											<input class="form-control" type="password" name="soc_tesla_mfapasscode" id="soc_tesla_mfapasscode" value="<?php echo $soc_tesla_mfapasscodeold ?>">
-											<span class="form-text small">
-												Optionaler PassCode für eine aktivierte 2-Faktor-Anmeldung. Der PassCode wird nur benötigt, wenn noch keine Token vorhanden sind. Nach erfolgreicher Anmeldung wid der PassCode entfernt.
-											</span>
+											<button type="button" class="btn btn-success soc-tesla-login-btn" data-email="#soc_tesla_username" value="1">Bei Tesla anmelden</button>
+											<button type="button" class="btn btn-danger soc-tesla-clear-btn" value="1">Anmeldedaten entfernen</button>
 										</div>
 									</div>
 									<div class="form-row mb-1">
@@ -841,6 +828,26 @@
 										</div>
 									</div>
 								</div>
+								<script>
+									$(function() {
+										var teslaUrl = "/openWB/modules/soc_tesla/tesla.php";
+
+										$('.soc-tesla-login-btn').click(function(){
+											var chargepoint = $(this).val();
+											var email = $($(this).attr('data-email')).val();
+											var teslaLoginUrl = teslaUrl+"?chargepoint="+chargepoint+"&email="+email;
+											// console.log("chargepoint: "+chargepoint+" email: "+email+" url: "+teslaLoginUrl);
+											window.open(teslaLoginUrl, '_tesla_login').focus();
+										});
+
+										$('.soc-tesla-clear-btn').click(function(){
+											var chargepoint = $(this).val();
+											var teslaCleanupUrl = teslaUrl+"?chargepoint="+chargepoint+"&go=cleanup";
+											// console.log("chargepoint: "+chargepoint+" email: "+email+" url: "+teslaLoginUrl);
+											window.open(teslaCleanupUrl, '_tesla_login').focus();
+										});
+									});
+								</script>
 							</div>
 							<div id="socmbluelink" class="hide">
 								<div class="form-group">
@@ -878,7 +885,7 @@
 									<div class="form-row mb-1">
 										<label for="soc_bluelink_pin" class="col-md-4 col-form-label">PIN</label>
 										<div class="col">
-											<input class="form-control" type="text" name="soc_bluelink_pin" id="soc_bluelink_pin" value="<?php echo $soc_bluelink_pinold ?>">
+											<input class="form-control" type="password" name="soc_bluelink_pin" id="soc_bluelink_pin" value="<?php echo $soc_bluelink_pinold ?>">
 											<span class="form-text small">
 												PIN des Accounts.
 											</span>
@@ -909,30 +916,57 @@
 												Bei Nein wird immer der SoC über die API abgefragt.
 											</span>
 										</div>
-										<div id="kiamanualcalcdiv" class="hide">
-											<div class="form-row mb-1">
-												<label for="kia_akkuglp1" class="col-md-4 col-form-label">Akkugröße in kWh bei manueller Berechnung</label>
-												<div class="col">
-													<input class="form-control" type="number" min="1" step="1" name="akkuglp1" id="kia_akkuglp1" value="<?php echo $akkuglp1old ?>">
-													<span class="form-text small">
-														Angabe der Netto-Kapazität der Fahrzeugbatterie in kWh. Dient zur Berechnung des manuellen SoC.<br>
-													</span>
-												</div>
+									</div>
+									<div id="kiamanualcalcdiv" class="hide">
+										<div class="form-row mb-1">
+											<label for="kia_akkuglp1" class="col-md-4 col-form-label">Akkugröße in kWh bei manueller Berechnung</label>
+											<div class="col">
+												<input class="form-control" type="number" min="1" step="1" name="akkuglp1" id="kia_akkuglp1" value="<?php echo $akkuglp1old ?>">
+												<span class="form-text small">
+													Angabe der Netto-Kapazität der Fahrzeugbatterie in kWh. Dient zur Berechnung des manuellen SoC.<br>
+												</span>
 											</div>
-											<div class="form-row mb-1">
-												<label for="kia_wirkungsgradlp1" class="col-md-4 col-form-label">Wirkungsgrad Ladeelektronik bei manueller Berechnung</label>
-												<div class="col">
-													<input class="form-control" type="number" min="1" step="1" max="100" name="wirkungsgradlp1" id="kia_wirkungsgradlp1" value="<?php echo $wirkungsgradlp1old ?>">
-													<span class="form-text small">
-														Wert in Prozent, der den gemittelten Wirkungsgrad der Ladeelektronik angibt.<br>
-														Für Kia e-niro (11 kWh Lader): 85-90 Prozent<br>
-														Durch Verluste in der Ladeelektronik (z. B. Umwandlung Wechselspannung in Gleichspannung) gelangt nicht die komplette Energie, welche durch den Zähler in der Wallbox gemesen wird, im Akku des Fahrzeugs.
-														Der anzugebende Wert liegt bei gängigen Fahrzeugen im Bereich 90-95%.<br>
-														Liegen die Angaben der Wallbox und des Fahrzeugs nach der Ladung mehrere Prozent auseinander, dann kann mit dieser Einstellung eine Feinabstimmung erfolgen:<br>
-														SoC an der Wallbox zu hoch: Wirkungsgrad um ein paar Prozent reduzieren<br>
-														SoC an der Wallbox zu gering: Wirkungsgrad um ein paar Prozent erhöhen
-													</span>
-												</div>
+										</div>
+										<div class="form-row mb-1">
+											<label for="kia_wirkungsgradlp1" class="col-md-4 col-form-label">Wirkungsgrad Ladeelektronik bei manueller Berechnung</label>
+											<div class="col">
+												<input class="form-control" type="number" min="1" step="1" max="100" name="wirkungsgradlp1" id="kia_wirkungsgradlp1" value="<?php echo $wirkungsgradlp1old ?>">
+												<span class="form-text small">
+													Wert in Prozent, der den gemittelten Wirkungsgrad der Ladeelektronik angibt.<br>
+													Für Kia e-niro (11 kWh Lader): 85-90 Prozent<br>
+													Durch Verluste in der Ladeelektronik (z. B. Umwandlung Wechselspannung in Gleichspannung) gelangt nicht die komplette Energie, welche durch den Zähler in der Wallbox gemesen wird, im Akku des Fahrzeugs.
+													Der anzugebende Wert liegt bei gängigen Fahrzeugen im Bereich 90-95%.<br>
+													Liegen die Angaben der Wallbox und des Fahrzeugs nach der Ladung mehrere Prozent auseinander, dann kann mit dieser Einstellung eine Feinabstimmung erfolgen:<br>
+													SoC an der Wallbox zu hoch: Wirkungsgrad um ein paar Prozent reduzieren<br>
+													SoC an der Wallbox zu gering: Wirkungsgrad um ein paar Prozent erhöhen
+												</span>
+											</div>
+										</div>
+									</div>
+									<div class="form-row mb-1">
+									<label class="col-md-4 col-form-label">Push-Funktion für ABRP</label>
+										<div class="col">
+											<div class="btn-group btn-group-toggle btn-block" data-toggle="buttons">
+												<label class="btn btn-outline-info<?php if($kia_abrp_enableold == 0) echo " active" ?>">
+													<input type="radio" name="kia_abrp_enable" id="kia_abrp_enableOff" value="0"<?php if($kia_abrp_enableold == 0) echo " checked=\"checked\"" ?>>Nein
+												</label>
+												<label class="btn btn-outline-info<?php if($kia_abrp_enableold == 1) echo " active" ?>">
+													<input type="radio" name="kia_abrp_enable" id="kia_abrp_enableOn" value="1"<?php if($kia_abrp_enableold == 1) echo " checked=\"checked\"" ?>>Ja
+												</label>
+											</div>
+											<span class="form-text small">
+												Wenn Ja gew&auml;hlt wird, wird der SoC regelm&auml;&szlig;ig an ABRP &uuml;bermittelt.<br>
+											</span>
+										</div>
+									</div>
+									<div id="kia_abrp_enablediv" class="hide">
+										<div class="form-row mb-1">
+											<label for="kia_abrp_token" class="col-md-4 col-form-label">ABRP Token</label>
+											<div class="col">
+												<input class="form-control" type="text" name="kia_abrp_token" id="kia_abrp_token_text" value="<?php echo $kia_abrp_tokenold ?>">
+												<span class="form-text small">
+													Token vom Typ "Generic" aus den Fahrzeug-Einstellungen<br>
+												</span>
 											</div>
 										</div>
 									</div>
@@ -946,12 +980,23 @@
 												showSection('#kiamanualcalcdiv');
 											}
 										}
+										function visibility_kia_abrp_enable() {
+											if($('#kia_abrp_enableOff').prop("checked")) {
+												hideSection('#kia_abrp_enablediv');
+											} else {
+												showSection('#kia_abrp_enablediv');
+											}
+										}
 
 										$('input[type=radio][name=kia_soccalclp1]').change(function(){
 											visibility_kia_soccalclp1();
 										});
+										$('input[type=radio][name=kia_abrp_enable]').change(function(){
+											visibility_kia_abrp_enable();
+										});
 
 										visibility_kia_soccalclp1();
+										visibility_kia_abrp_enable();
 									});
 								</script>
 							</div>
@@ -2896,23 +2941,10 @@
 										</div>
 									</div>
 									<div class="form-row mb-1">
-										<label for="soc_teslalp2_password" class="col-md-4 col-form-label">Passwort</label>
+										<label for="soc_tesla_login_btn" class="col-md-4 col-form-label">Anmeldedaten prüfen</label>
 										<div class="col">
-											<input class="form-control" type="password" name="soc_teslalp2_password" id="soc_teslalp2_password" value="<?php echo $soc_teslalp2_passwordold ?>">
-											<span class="form-text small">
-												Password des Tesla Logins. Das Passwort wird nur bei der ersten Einrichtung verwendet. Sobald die Anmeldung erfolgreich war, wird die Anmeldung über Token geregelt und das Passwort durch "#TokenInUse#" ersetzt.<br>
-												Wird bei Tesla direkt das Passwort geändert, kann die WB sich nicht mehr anmelden und es muss hier wieder einmalig das aktuelle Passwort eingetragen werden.<br>
-												Wenn das Eingabefeld geleert wird, dann werden auch die Anmeldetoken komplett entfernt.
-											</span>
-										</div>
-									</div>
-									<div class="form-row mb-1">
-										<label for="soc_teslalp2_mfapasscode" class="col-md-4 col-form-label">MFA-PassCode</label>
-										<div class="col">
-											<input class="form-control" type="password" name="soc_teslalp2_mfapasscode" id="soc_teslalp2_mfapasscode" value="<?php echo $soc_teslalp2_mfapasscodeold ?>">
-											<span class="form-text small">
-												Optionaler PassCode für eine aktivierte 2-Faktor-Anmeldung. Der PassCode wird nur benötigt, wenn noch keine Token vorhanden sind. Nach erfolgreicher Anmeldung wid der PassCode entfernt.
-											</span>
+											<button type="button" class="btn btn-success soc-tesla-login-btn" data-email="#soc_teslalp2_username" value="2">Bei Tesla anmelden</button>
+											<button type="button" class="btn btn-danger soc-tesla-clear-btn" value="2">Anmeldedaten entfernen</button>
 										</div>
 									</div>
 									<div class="form-row mb-1">
@@ -3183,7 +3215,7 @@
 									<div class="form-row mb-1">
 										<label for="soc2pin" class="col-md-4 col-form-label">Pin</label>
 										<div class="col">
-											<input class="form-control" type="text" name="soc2pin" id="soc2pin" value="<?php echo $soc2pinold ?>">
+											<input class="form-control" type="password" name="soc2pin" id="soc2pin" value="<?php echo $soc2pinold ?>">
 											<span class="form-text small">
 												PIN des Accounts.
 											</span>
@@ -3573,30 +3605,57 @@
 												Bei Nein wird immer der SoC über die API abgefragt.
 											</span>
 										</div>
-										<div id="kiamanualcalclp2div" class="hide">
-											<div class="form-row mb-1">
-												<label for="kia_akkuglp2" class="col-md-4 col-form-label">Akkugröße in kWh bei manueller Berechnung</label>
-												<div class="col">
-													<input class="form-control" type="number" min="1" step="1" name="akkuglp2" id="kia_akkuglp2" value="<?php echo $akkuglp2old ?>">
-													<span class="form-text small">
-														Angabe der Netto-Kapazität der Fahrzeugbatterie in kWh. Dient zur Berechnung des manuellen SoC.<br>
-													</span>
-												</div>
+									</div>
+									<div id="kiamanualcalclp2div" class="hide">
+										<div class="form-row mb-1">
+											<label for="kia_akkuglp2" class="col-md-4 col-form-label">Akkugröße in kWh bei manueller Berechnung</label>
+											<div class="col">
+												<input class="form-control" type="number" min="1" step="1" name="akkuglp2" id="kia_akkuglp2" value="<?php echo $akkuglp2old ?>">
+												<span class="form-text small">
+													Angabe der Netto-Kapazität der Fahrzeugbatterie in kWh. Dient zur Berechnung des manuellen SoC.<br>
+												</span>
 											</div>
-											<div class="form-row mb-1">
-												<label for="kia_wirkungsgradlp2" class="col-md-4 col-form-label">Wirkungsgrad Ladeelektronik bei manueller Berechnung</label>
-												<div class="col">
-													<input class="form-control" type="number" min="1" step="1" max="100" name="wirkungsgradlp2" id="kia_wirkungsgradlp2" value="<?php echo $wirkungsgradlp2old ?>">
-													<span class="form-text small">
-														Wert in Prozent, der den gemittelten Wirkungsgrad der Ladeelektronik angibt.<br>
-														Für Kia e-niro (11 kWh Lader): 85-90 Prozent<br>
-														Durch Verluste in der Ladeelektronik (z. B. Umwandlung Wechselspannung in Gleichspannung) gelangt nicht die komplette Energie, welche durch den Zähler in der Wallbox gemesen wird, im Akku des Fahrzeugs.
-														Der anzugebende Wert liegt bei gängigen Fahrzeugen im Bereich 90-95%.<br>
-														Liegen die Angaben der Wallbox und des Fahrzeugs nach der Ladung mehrere Prozent auseinander, dann kann mit dieser Einstellung eine Feinabstimmung erfolgen:<br>
-														SoC an der Wallbox zu hoch: Wirkungsgrad um ein paar Prozent reduzieren<br>
-														SoC an der Wallbox zu gering: Wirkungsgrad um ein paar Prozent erhöhen
-													</span>
-												</div>
+										</div>
+										<div class="form-row mb-1">
+											<label for="kia_wirkungsgradlp2" class="col-md-4 col-form-label">Wirkungsgrad Ladeelektronik bei manueller Berechnung</label>
+											<div class="col">
+												<input class="form-control" type="number" min="1" step="1" max="100" name="wirkungsgradlp2" id="kia_wirkungsgradlp2" value="<?php echo $wirkungsgradlp2old ?>">
+												<span class="form-text small">
+													Wert in Prozent, der den gemittelten Wirkungsgrad der Ladeelektronik angibt.<br>
+													Für Kia e-niro (11 kWh Lader): 85-90 Prozent<br>
+													Durch Verluste in der Ladeelektronik (z. B. Umwandlung Wechselspannung in Gleichspannung) gelangt nicht die komplette Energie, welche durch den Zähler in der Wallbox gemesen wird, im Akku des Fahrzeugs.
+													Der anzugebende Wert liegt bei gängigen Fahrzeugen im Bereich 90-95%.<br>
+													Liegen die Angaben der Wallbox und des Fahrzeugs nach der Ladung mehrere Prozent auseinander, dann kann mit dieser Einstellung eine Feinabstimmung erfolgen:<br>
+													SoC an der Wallbox zu hoch: Wirkungsgrad um ein paar Prozent reduzieren<br>
+													SoC an der Wallbox zu gering: Wirkungsgrad um ein paar Prozent erhöhen
+												</span>
+											</div>
+										</div>
+									</div>
+									<div class="form-row mb-1">
+									<label class="col-md-4 col-form-label">Push-Funktion für ABRP</label>
+										<div class="col">
+											<div class="btn-group btn-group-toggle btn-block" data-toggle="buttons">
+												<label class="btn btn-outline-info<?php if($kia_abrp_enable_2old == 0) echo " active" ?>">
+													<input type="radio" name="kia_abrp_enable_2" id="kia_abrp_enable_2Off" value="0"<?php if($kia_abrp_enable_2old == 0) echo " checked=\"checked\"" ?>>Nein
+												</label>
+												<label class="btn btn-outline-info<?php if($kia_abrp_enable_2old == 1) echo " active" ?>">
+													<input type="radio" name="kia_abrp_enable_2" id="kia_abrp_enable_2On" value="1"<?php if($kia_abrp_enable_2old == 1) echo " checked=\"checked\"" ?>>Ja
+												</label>
+											</div>
+											<span class="form-text small">
+												Wenn Ja gew&auml;hlt wird, wird der SoC regelm&auml;&szlig;ig an ABRP &uuml;bermittelt.<br>
+											</span>
+										</div>
+									</div>
+									<div id="kia_abrp_enable_2div" class="hide">
+										<div class="form-row mb-1">
+											<label for="kia_abrp_token_2" class="col-md-4 col-form-label">ABRP Token</label>
+											<div class="col">
+												<input class="form-control" type="text" name="kia_abrp_token_2" id="kia_abrp_token_2_text" value="<?php echo $kia_abrp_token_2old ?>">
+												<span class="form-text small">
+													Token vom Typ "Generic" aus den Fahrzeug-Einstellungen<br>
+												</span>
 											</div>
 										</div>
 									</div>
@@ -3610,12 +3669,23 @@
 											showSection('#kiamanualcalclp2div');
 										}
 									}
+									function visibility_kia_abrp_enable_2() {
+										if($('#kia_abrp_enable_2Off').prop("checked")) {
+											hideSection('#kia_abrp_enable_2div');
+										} else {
+											showSection('#kia_abrp_enable_2div');
+										}
+									}
 
 									$('input[type=radio][name=kia_soccalclp2]').change(function(){
 										visibility_kia_soccalclp2();
 									});
+									$('input[type=radio][name=kia_abrp_enable_2]').change(function(){
+										visibility_kia_abrp_enable_2();
+									});
 
 									visibility_kia_soccalclp2();
+									visibility_kia_abrp_enable_2();
 								});
 								</script>
 							</div>
