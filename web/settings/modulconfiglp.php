@@ -319,6 +319,19 @@
 							<input type="hidden" name="ladeleistungmodul" value="twcmanagerlp1">
 							<div class="form-group">
 								<div class="form-row mb-1">
+									<div class="col-md-4">
+										HTTPControl / Ngardiner Fork
+									</div>
+									<div class="btn-group btn-group-toggle col" data-toggle="buttons">
+										<label class="btn btn-outline-info<?php if($twcmanagerlp1httpcontrolold == 0) echo " active" ?>">
+											<input type="radio" name="twcmanagerlp1httpcontrol" id="twcmanagerlp1httpcontrolOff" value="0"<?php if($twcmanagerlp1httpcontrolold == 0) echo " checked=\"checked\"" ?>>Nein
+										</label>
+										<label class="btn btn-outline-info<?php if($twcmanagerlp1httpcontrolold == 1) echo " active" ?>">
+											<input type="radio" name="twcmanagerlp1httpcontrol" id="twcmanagerlp1httpcontrolOn" value="1"<?php if($twcmanagerlp1httpcontrolold == 1) echo " checked=\"checked\"" ?>>Ja
+										</label>
+									</div>
+								</div>
+								<div class="form-row mb-1">
 									<label for="twcmanagerlp1ip" class="col-md-4 col-form-label">IP Adresse</label>
 									<div class="col">
 										<input class="form-control" type="text" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" name="twcmanagerlp1ip" id="twcmanagerlp1ip" value="<?php echo $twcmanagerlp1ipold ?>">
@@ -327,7 +340,14 @@
 										</span>
 									</div>
 								</div>
-								<div class="form-row mb-1">
+								<div class="form-row mb-1 input-port">
+									<label for="twcmanagerlp1port" class="col-md-4 col-form-label">Port</label>
+									<div class="col">
+										<input class="form-control" type="number" min="80" max="10000" step="1" name="twcmanagerlp1port" id="twcmanagerlp1port" value="<?php echo $twcmanagerlp1portold ?>">
+										<span class="form-text small">Port des HTTP Control Interface. Standard: 8080</span>
+									</div>
+								</div>
+								<div class="form-row mb-1 input-phases">
 									<label for="twcmanagerlp1phasen" class="col-md-4 col-form-label">Anzahl Phasen</label>
 									<div class="col">
 										<input class="form-control" type="number" min="1" max="3" step="1" name="twcmanagerlp1phasen" id="twcmanagerlp1phasen" value="<?php echo $twcmanagerlp1phasenold ?>">
@@ -336,6 +356,26 @@
 								</div>
 							</div>
 						</div>
+						<script>
+							$(function() {
+								function visibility_twcmanagerlp1_connection() {
+									if($('#twcmanagerlp1httpcontrolOff').prop("checked")) {
+										hideSection('#evsecontwcmanager .input-port');
+										showSection('#evsecontwcmanager .input-phases');
+									} else {
+										showSection('#evsecontwcmanager .input-port');
+										hideSection('#evsecontwcmanager .input-phases');
+									}
+								}
+
+								$('input[type=radio][name=twcmanagerlp1httpcontrol]').change(function(){
+									visibility_twcmanagerlp1_connection();
+								});
+
+	       							visibility_twcmanagerlp1_connection();
+							});
+						</script>
+
 						<div id="evsecongoe" class="hide">
 							<input type="hidden" name="ladeleistungmodul" value="goelp1">
 							<div class="form-group">
@@ -689,8 +729,7 @@
 									<optgroup label="Fahrzeughersteller">
 										<option <?php if($socmodulold == "soc_audi") echo "selected" ?> value="soc_audi">Audi</option>
 										<option <?php if($socmodulold == "soc_i3") echo "selected" ?> value="soc_i3">BMW &amp; Mini</option>
-										<option <?php if($socmodulold == "soc_bluelink") echo "selected" ?> value="soc_bluelink">Hyundai</option>
-										<option <?php if($socmodulold == "soc_kia") echo "selected" ?> value="soc_kia">Kia</option>
+										<option <?php if($socmodulold == "soc_kia") echo "selected" ?> value="soc_kia">Kia / Hyundai</option>
 										<option <?php if($socmodulold == "soc_eq") echo "selected" ?> value="soc_eq">Mercedes EQ</option>
 										<option <?php if($socmodulold == "soc_myopel") echo "selected" ?> value="soc_myopel">MyOpel</option>
 										<option <?php if($socmodulold == "soc_mypeugeot") echo "selected" ?> value="soc_mypeugeot">MyPeugeot</option>
@@ -849,7 +888,7 @@
 									});
 								</script>
 							</div>
-							<div id="socmbluelink" class="hide">
+							<div id="socmkia" class="hide">
 								<div class="form-group">
 									<div class="form-row mb-1">
 										<label for="soc_bluelink_email" class="col-md-4 col-form-label">E-Mail</label>
@@ -878,10 +917,6 @@
 											</span>
 										</div>
 									</div>
-								</div>
-							</div>
-							<div id="socmkia" class="hide">
-								<div class="form-group">
 									<div class="form-row mb-1">
 										<label for="soc_bluelink_pin" class="col-md-4 col-form-label">PIN</label>
 										<div class="col">
@@ -970,6 +1005,60 @@
 											</div>
 										</div>
 									</div>
+									<div class="form-row mb-1">
+									<label class="col-md-4 col-form-label">Erweiterte Einstellungen</label>
+										<div class="col">
+											<div class="btn-group btn-group-toggle btn-block" data-toggle="buttons">
+												<label class="btn btn-outline-info<?php if($kia_advancedold == 0) echo " active" ?>">
+													<input type="radio" name="kia_advanced" id="kia_advancedOff" value="0"<?php if($kia_advancedold == 0) echo " checked=\"checked\"" ?>>Nein
+												</label>
+												<label class="btn btn-outline-info<?php if($kia_advancedold == 1) echo " active" ?>">
+													<input type="radio" name="kia_advanced" id="kia_advancedOn" value="1"<?php if($kia_advancedold == 1) echo " checked=\"checked\"" ?>>Ja
+												</label>
+											</div>
+											<span class="form-text small">
+												<br>
+											</span>
+										</div>
+									</div>
+									<div id="kia_advanceddiv" class="hide">
+										<div class="form-row mb-1">
+											<label for="kia_adv_cachevalid" class="col-md-4 col-form-label">Cache G&uuml;ltigkeit</label>
+											<div class="col">
+												<input class="form-control" type="number" min="0" step="1" name="kia_adv_cachevalid" id="kia_adv_cachevalid" value="<?php echo $kia_adv_cachevalidold ?>">
+												<span class="form-text small">
+													Gültigkeitsdauer des letzten Status in Minuten, z.B. nach Abstellen des Autos oder Abruf in der App (0=Abruf immer vom Auto; Default: 10)<br>
+												</span>
+											</div>
+										</div>
+										<div class="form-row mb-1">
+											<label for="kia_adv_12v" class="col-md-4 col-form-label">12V SoC Limit</label>
+											<div class="col">
+												<input class="form-control" type="number" min="0" max="100" step="1" name="kia_adv_12v" id="kia_adv_12v" value="<?php echo $kia_adv_12vold ?>">
+												<span class="form-text small">
+													Minimaler SoC der 12V-Batterie für Abrufe in Prozent (Default: 20)<br>
+												</span>
+											</div>
+										</div>
+										<div class="form-row mb-1">
+											<label for="kia_adv_interval_unplug" class="col-md-4 col-form-label">Abrufintervall abgesteckt</label>
+											<div class="col">
+												<input class="form-control" type="number" min="0" step="1" name="kia_adv_interval_unplug" id="kia_adv_interval_unplug" value="<?php echo $kia_adv_interval_unplugold ?>">
+												<span class="form-text small">
+													Abrufintervall bei abgestecktem Auto in Minuten (sofern freigegeben)<br>
+												</span>
+											</div>
+										</div>
+										<div class="form-row mb-1">
+											<label for="kia_adv_ratelimit" class="col-md-4 col-form-label">Abrufsperre</label>
+											<div class="col">
+												<input class="form-control" type="number" min="0" step="1" name="kia_adv_ratelimit" id="kia_adv_ratelimit" value="<?php echo $kia_adv_ratelimitold ?>">
+												<span class="form-text small">
+													Minimaler Abstand zwischen Abrufen in Minuten (default: 15)<br>
+												</span>
+											</div>
+										</div>
+									</div>
 								</div>
 								<script>
 									$(function() {
@@ -987,6 +1076,13 @@
 												showSection('#kia_abrp_enablediv');
 											}
 										}
+										function visibility_kia_advanced() {
+											if($('#kia_advancedOff').prop("checked")) {
+												hideSection('#kia_advanceddiv');
+											} else {
+												showSection('#kia_advanceddiv');
+											}
+										}
 
 										$('input[type=radio][name=kia_soccalclp1]').change(function(){
 											visibility_kia_soccalclp1();
@@ -994,9 +1090,13 @@
 										$('input[type=radio][name=kia_abrp_enable]').change(function(){
 											visibility_kia_abrp_enable();
 										});
+										$('input[type=radio][name=kia_advanced]').change(function(){
+											visibility_kia_advanced();
+										});
 
 										visibility_kia_soccalclp1();
 										visibility_kia_abrp_enable();
+										visibility_kia_advanced();
 									});
 								</script>
 							</div>
@@ -2169,7 +2269,6 @@
 							hideSection('#socvag');
 							hideSection('#socevcc');
 							hideSection('#socmqtt');
-							hideSection('#socmbluelink');
 							hideSection('#socmkia');
 							hideSection('#socmuser');
 							hideSection('#socmpass');
@@ -2198,12 +2297,6 @@
 								showSection('#socsupportinfo');
 								showSection('#socmqtt');
 							}
-							if($('#socmodul').val() == 'soc_bluelink') {
-								$('#socsuportlink').attr('href', 'https://openwb.de/forum/viewtopic.php?f=12&t=3138')
-								showSection('#socsupportinfo');
-								showSection('#socmkia');
-								showSection('#socmbluelink');
-							}
 							if($('#socmodul').val() == 'soc_id') {
 								showSection('#socoldevccwarning');
 								showSection('#socmid');
@@ -2221,7 +2314,6 @@
 								$('#socsuportlink').attr('href', 'https://openwb.de/forum/viewtopic.php?f=12&t=3137')
 								showSection('#socsupportinfo');
 								showSection('#socmkia');
-								showSection('#socmbluelink');
 							}
 							if($('#socmodul').val() == 'soc_audi') {
 								showSection('#socoldevccwarning');
@@ -2352,6 +2444,7 @@
 										<option <?php if($evsecons1old == "keba") echo "selected" ?> value="keba">Keba</option>
 										<option <?php if($evsecons1old == "nrgkick") echo "selected" ?> value="nrgkick">NRGKick + Connect</option>
 										<option <?php if($evsecons1old == "simpleevsewifi") echo "selected" ?> value="simpleevsewifi">SimpleEVSEWifi</option>
+										<option <?php if($evsecons1old == "twcmanager") echo "selected" ?> value="twcmanager">Tesla TWC mit TWCManager</option>
 									</optgroup>
 									<optgroup label="generische Module">
 										<option <?php if($evsecons1old == "dac") echo "selected" ?> value="dac">DAC</option>
@@ -2545,6 +2638,66 @@
 								<span class="text-info">openWB/set/lp/2/chargeStat</span> Status, ob gerade geladen wird, nur 0 (nein) oder 1 (ja)
 							</div>
 						</div>
+						<div id="evsecontwcmanagers1" class="hide">
+							<input type="hidden" name="ladeleistungmodul" value="twcmanagerlp2">
+							<div class="form-group">
+								<div class="form-row mb-1">
+									<div class="col-md-4">
+										HTTPControl / Ngardiner Fork
+									</div>
+									<div class="btn-group btn-group-toggle col" data-toggle="buttons">
+										<label class="btn btn-outline-info<?php if($twcmanagerlp2httpcontrolold == 0) echo " active" ?>">
+											<input type="radio" name="twcmanagerlp2httpcontrol" id="twcmanagerlp2httpcontrolOff" value="0"<?php if($twcmanagerlp2httpcontrolold == 0) echo " checked=\"checked\"" ?>>Nein
+										</label>
+										<label class="btn btn-outline-info<?php if($twcmanagerlp2httpcontrolold == 1) echo " active" ?>">
+											<input type="radio" name="twcmanagerlp2httpcontrol" id="twcmanagerlp2httpcontrolOn" value="1"<?php if($twcmanagerlp2httpcontrolold == 1) echo " checked=\"checked\"" ?>>Ja
+										</label>
+									</div>
+								</div>
+								<div class="form-row mb-1">
+									<label for="twcmanagerlp2ip" class="col-md-4 col-form-label">IP Adresse</label>
+									<div class="col">
+										<input class="form-control" type="text" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" name="twcmanagerlp2ip" id="twcmanagerlp2ip" value="<?php echo $twcmanagerlp2ipold ?>">
+										<span class="form-text small">
+											Gültige Werte IP Adresse im Format: 192.168.0.12
+										</span>
+									</div>
+								</div>
+								<div class="form-row mb-1 input-port">
+									<label for="twcmanagerlp2port" class="col-md-4 col-form-label">Port</label>
+									<div class="col">
+										<input class="form-control" type="number" min="80" max="10000" step="1" name="twcmanagerlp2port" id="twcmanagerlp2port" value="<?php echo $twcmanagerlp2portold ?>">
+										<span class="form-text small">Port des HTTP Control Interface. Standard: 8080</span>
+									</div>
+								</div>
+								<div class="form-row mb-1 input-phases">
+									<label for="twcmanagerlp2phasen" class="col-md-4 col-form-label">Anzahl Phasen</label>
+									<div class="col">
+										<input class="form-control" type="number" min="1" max="3" step="1" name="twcmanagerlp2phasen" id="twcmanagerlp2phasen" value="<?php echo $twcmanagerlp2phasenold ?>">
+										<span class="form-text small">Definiert die genutzte Anzahl der Phasen zur korrekten Errechnung der Ladeleistung (BETA).</span>
+									</div>
+								</div>
+							</div>
+						</div>
+						<script>
+							$(function() {
+								function visibility_twcmanagerlp2_connection() {
+									if($('#twcmanagerlp2httpcontrolOff').prop("checked")) {
+										hideSection('#evsecontwcmanagers1 .input-port');
+										showSection('#evsecontwcmanagers1 .input-phases');
+									} else {
+										showSection('#evsecontwcmanagers1 .input-port');
+										hideSection('#evsecontwcmanagers1 .input-phases');
+									}
+								}
+
+								$('input[type=radio][name=twcmanagerlp2httpcontrol]').change(function(){
+									visibility_twcmanagerlp2_connection();
+								});
+
+								visibility_twcmanagerlp2_connection();
+							});
+						</script>
 						<div id="evsecoslaveeth" class="hide">
 							<input type="hidden" name="ladeleistungs1modul" value="mpm3pmethll">
 							<div class="card-text alert alert-info">
@@ -2777,8 +2930,7 @@
 									<optgroup label="Fahrzeughersteller">
 										<option <?php if($socmodul1old == "soc_audilp2") echo "selected" ?> value="soc_audilp2">Audi</option>
 										<option <?php if($socmodul1old == "soc_i3s1") echo "selected" ?> value="soc_i3s1">BMW &amp; Mini</option>
-										<option <?php if($socmodul1old == "soc_bluelinklp2") echo "selected" ?> value="soc_bluelinklp2">Hyundai</option>
-										<option <?php if($socmodul1old == "soc_kialp2") echo "selected" ?> value="soc_kialp2">Kia</option>
+										<option <?php if($socmodul1old == "soc_kialp2") echo "selected" ?> value="soc_kialp2">Kia / Hyundai</option>
 										<option <?php if($socmodul1old == "soc_eqlp2") echo "selected" ?> value="soc_eqlp2">Mercedes EQ</option>
 										<option <?php if($socmodul1old == "soc_myopellp2") echo "selected" ?> value="soc_myopellp2">MyOpel</option>
 										<option <?php if($socmodul1old == "soc_mypeugeotlp2") echo "selected" ?> value="soc_mypeugeotlp2">MyPeugeot</option>
@@ -3659,6 +3811,60 @@
 											</div>
 										</div>
 									</div>
+									<div class="form-row mb-1">
+									<label class="col-md-4 col-form-label">Erweiterte Einstellungen</label>
+										<div class="col">
+											<div class="btn-group btn-group-toggle btn-block" data-toggle="buttons">
+												<label class="btn btn-outline-info<?php if($kia_advanced2old == 0) echo " active" ?>">
+													<input type="radio" name="kia_advanced2" id="kia_advanced2Off" value="0"<?php if($kia_advanced2old == 0) echo " checked=\"checked\"" ?>>Nein
+												</label>
+												<label class="btn btn-outline-info<?php if($kia_advanced2old == 1) echo " active" ?>">
+													<input type="radio" name="kia_advanced2" id="kia_advanced2On" value="1"<?php if($kia_advanced2old == 1) echo " checked=\"checked\"" ?>>Ja
+												</label>
+											</div>
+											<span class="form-text small">
+												<br>
+											</span>
+										</div>
+									</div>
+									<div id="kia_advanced2div" class="hide">
+										<div class="form-row mb-1">
+											<label for="kia_adv_cachevalid2" class="col-md-4 col-form-label">Cache G&uuml;ltigkeit</label>
+											<div class="col">
+												<input class="form-control" type="number" min="0" step="1" name="kia_adv_cachevalid2" id="kia_adv_cachevalid2" value="<?php echo $kia_adv_cachevalid2old ?>">
+												<span class="form-text small">
+													Gültigkeitsdauer des letzten Status in Minuten, z.B. nach Abstellen des Autos oder Abruf in der App (0=Abruf immer vom Auto; Default: 10)<br>
+												</span>
+											</div>
+										</div>
+										<div class="form-row mb-1">
+											<label for="kia_adv_12v2" class="col-md-4 col-form-label">12V SoC Limit</label>
+											<div class="col">
+												<input class="form-control" type="number" min="0" max="100" step="1" name="kia_adv_12v2" id="kia_adv_12v2" value="<?php echo $kia_adv_12v2old ?>">
+												<span class="form-text small">
+													Minimaler SoC der 12V-Batterie für Abrufe in Prozent (Default: 20)<br>
+												</span>
+											</div>
+										</div>
+										<div class="form-row mb-1">
+											<label for="kia_adv_interval_unplug2" class="col-md-4 col-form-label">Abrufintervall abgesteckt</label>
+											<div class="col">
+												<input class="form-control" type="number" min="0" step="1" name="kia_adv_interval_unplug2" id="kia_adv_interval_unplug2" value="<?php echo $kia_adv_interval_unplug2old ?>">
+												<span class="form-text small">
+													Abrufintervall bei abgestecktem Auto in Minuten (sofern freigegeben)<br>
+												</span>
+											</div>
+										</div>
+										<div class="form-row mb-1">
+											<label for="kia_adv_ratelimit2" class="col-md-4 col-form-label">Abrufsperre</label>
+											<div class="col">
+												<input class="form-control" type="number" min="0" step="1" name="kia_adv_ratelimit2" id="kia_adv_ratelimit2" value="<?php echo $kia_adv_ratelimit2old ?>">
+												<span class="form-text small">
+													Minimaler Abstand zwischen Abrufen in Minuten (default: 15)<br>
+												</span>
+											</div>
+										</div>
+									</div>
 								</div>
 								<script>
 								$(function() {
@@ -3676,6 +3882,13 @@
 											showSection('#kia_abrp_enable_2div');
 										}
 									}
+									function visibility_kia_advanced2() {
+										if($('#kia_advanced2Off').prop("checked")) {
+											hideSection('#kia_advanced2div');
+										} else {
+											showSection('#kia_advanced2div');
+										}
+									}
 
 									$('input[type=radio][name=kia_soccalclp2]').change(function(){
 										visibility_kia_soccalclp2();
@@ -3683,9 +3896,13 @@
 									$('input[type=radio][name=kia_abrp_enable_2]').change(function(){
 										visibility_kia_abrp_enable_2();
 									});
+									$('input[type=radio][name=kia_advanced2]').change(function(){
+										visibility_kia_advanced2();
+									});
 
 									visibility_kia_soccalclp2();
 									visibility_kia_abrp_enable_2();
+									visibility_kia_advanced2();
 								});
 								</script>
 							</div>
@@ -3901,6 +4118,7 @@
 							hideSection('#evsecondaemonlp2');
 							hideSection('#evseconipevselp2');
 							hideSection('#evseconmqtts1');
+							hideSection('#evsecontwcmanagers1');
 
 							if($('#evsecons1').val() == 'modbusevse') {
 								switch( $("#evsecons1 option:selected").attr('data-id') ){
@@ -3910,7 +4128,7 @@
 									case "openwb series1/2 duo v2":
 										showSection('#openwb12s1v2');
 									break;
-									default:
+						       			default:
 										showSection('#evseconmbs1');
 										showSection('#llmodullp2');
 										display_llmp2();
@@ -3951,6 +4169,9 @@
 							}
 							if($('#evsecons1').val() == 'nrgkick') {
 								showSection('#evseconnrgkicks1');
+							}
+							if($('#evsecons1').val() == 'twcmanager') {
+								showSection('#evsecontwcmanagers1');
 							}
 						}
 
@@ -4045,16 +4266,6 @@
 								showSection('#socmuser2');
 								showSection('#socmpass2');
 								showSection('#socmvin2');
-							}
-							if($('#socmodul1').val() == 'soc_bluelinklp2') {
-								$('#socsuportlinklp2').attr('href', 'https://openwb.de/forum/viewtopic.php?f=12&t=3138')
-								showSection('#socsupportinfolp2');
-								showSection('#socmuser2');
-								showSection('#socmpass2');
-								showSection('#socmpin2');
-								showSection('#socmvin2');
-								showSection('#socmintervall2');
-								showSection('#socmkialp2');
 							}
 							if($('#socmodul1').val() == 'soc_kialp2') {
 								$('#socsuportlinklp2').attr('href', 'https://openwb.de/forum/viewtopic.php?f=12&t=3137')
