@@ -920,10 +920,10 @@ def on_message(client, userdata, msg):
                     finally:
                         if (re.match(emailallowed, json_payload["email"])):
                             f = open('/var/www/html/openWB/ramdisk/debuguser', 'w')
-                            f.write(json_payload["message"])
+                            f.write("%s\n%s\n" % (json_payload["message"], json_payload["email"]))
                             f.close()
-                            f = open('/var/www/html/openWB/ramdisk/debugmail', 'w')
-                            f.write(json_payload["email"])
+                            f = open('/var/www/html/openWB/ramdisk/debugemail', 'w')
+                            f.write(json_payload["email"] + "\n")
                             f.close()
                         else:
                             file = open('/var/www/html/openWB/ramdisk/mqtt.log', 'a')
@@ -1324,6 +1324,12 @@ def on_message(client, userdata, msg):
                     f = open('/var/www/html/openWB/ramdisk/soc1', 'w')
                     f.write(msg.payload.decode("utf-8"))
                     f.close()
+            if (msg.topic == "openWB/set/pv/1/kWhCounter"):
+                if (float(msg.payload) >= 0 and float(msg.payload) <= 10000000000):
+                    pvkwhcounter=float(msg.payload.decode("utf-8"))*1000
+                    f = open('/var/www/html/openWB/ramdisk/pvkwh', 'w')
+                    f.write(str(pvkwhcounter))
+                    f.close()
             if (msg.topic == "openWB/set/pv/1/WhCounter"):
                 if (float(msg.payload) >= 0 and float(msg.payload) <= 10000000000):
                     f = open('/var/www/html/openWB/ramdisk/pvkwh', 'w')
@@ -1337,6 +1343,12 @@ def on_message(client, userdata, msg):
                         pvwatt=int(float(msg.payload.decode("utf-8")))
                     f = open('/var/www/html/openWB/ramdisk/pvwatt', 'w')
                     f.write(str(pvwatt))
+                    f.close()
+            if (msg.topic == "openWB/set/pv/2/kWhCounter"):
+                if (float(msg.payload) >= 0 and float(msg.payload) <= 10000000000):
+                    pvkwhcounter=float(msg.payload.decode("utf-8"))*1000
+                    f = open('/var/www/html/openWB/ramdisk/pvkwh', 'w')
+                    f.write(str(pvkwhcounter))
                     f.close()
             if (msg.topic == "openWB/set/pv/2/WhCounter"):
                 if (float(msg.payload) >= 0 and float(msg.payload) <= 10000000000):
