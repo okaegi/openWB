@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-import sys
 import time
-from typing import Dict, List, Union
+from typing import Dict, Union, List
 
 from helpermodules import log
+from helpermodules.cli import run_using_positional_cli_args
 from modules.common import modbus
 from modules.common.abstract_device import AbstractDevice
 from modules.common.component_context import SingleComponentUpdateContext
@@ -73,14 +73,12 @@ class Device(AbstractDevice):
             )
 
 
-def read_legacy(argv: List[str]) -> None:
+def read_legacy(ip_address: str, modbus_id: int) -> None:
     COMPONENT_TYPE_TO_MODULE = {
         "bat": bat,
         "counter": counter,
         "inverter": inverter
     }
-    ip_address = argv[1]
-    modbus_id = argv[2]
 
     device_config = get_default_config()
     device_config["configuration"]["ip_address"] = ip_address
@@ -107,8 +105,5 @@ def read_legacy(argv: List[str]) -> None:
     dev.update()
 
 
-if __name__ == "__main__":
-    try:
-        read_legacy(sys.argv)
-    except Exception:
-        log.MainLogger().exception("Fehler im Huawei Skript")
+def main(argv: List[str]):
+    run_using_positional_cli_args(read_legacy, argv)

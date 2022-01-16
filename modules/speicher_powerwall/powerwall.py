@@ -3,7 +3,6 @@
 import json
 import logging
 from json import JSONDecodeError
-
 import requests
 from requests import HTTPError
 
@@ -16,10 +15,13 @@ COOKIE_FILE = RAMDISK_PATH / "powerwall_cookie.txt"
 log = logging.getLogger("Powerwall")
 
 
-def authenticate(url: str, password: str):
+def authenticate(url: str, email: str, password: str):
+    '''
+    email is not yet required for login (2022/01), but we simulate the whole login page
+    '''
     response = requests.post(
         "https://" + url + "/api/login/Basic",
-        json={"username": "", "password": password, "force_sm_off": False},
+        json={"username": "customer", "email": email, "password": password},
         verify=False,
         timeout=5
     )
@@ -45,20 +47,20 @@ def read_aggregate(address: str, cookie):
 def update_using_cookie(address: str, cookie):
     aggregate = read_aggregate(address, cookie)
     get_bat_value_store(1).set(BatState(
-        imported=aggregate["battery"]["energy_imported"],
-        exported=aggregate["battery"]["energy_exported"],
-        power=-aggregate["battery"]["instant_power"],
-        soc=read_soc(address, cookie)
+        imported = aggregate["battery"]["energy_imported"],
+        exported = aggregate["battery"]["energy_exported"],
+        power = -aggregate["battery"]["instant_power"],
+        soc = read_soc(address, cookie)
     ))
 
 
-def authenticate_and_update(address: str, password: str):
-    cookie = authenticate(address, password)
+def authenticate_and_update(address: str, email: str, password: str):
+    cookie = authenticate(address, email, password)
     COOKIE_FILE.write_text(json.dumps(cookie))
     update_using_cookie(address, cookie)
 
 
-def update(address: str, password: str):
+def update(address: str, email: str, password: str):
     log.debug("Beginning update")
     cookies = None
     try:
@@ -69,7 +71,7 @@ def update(address: str, password: str):
         log.warning("Could not parse Cookie-File <%s>. It will be re-created.", COOKIE_FILE, exc_info=e)
 
     if cookies is None:
-        authenticate_and_update(address, password)
+        authenticate_and_update(address, email, password)
         return
     try:
         update_using_cookie(address, cookies)
@@ -78,7 +80,7 @@ def update(address: str, password: str):
         if e.response.status_code != 401 and e.response.status_code != 403:
             raise e
         log.warning("Login to powerwall with existing cookie failed. Will retry with new cookie...")
-    authenticate_and_update(address, password)
+    authenticate_and_update(address, email, password)
     log.debug("Update completed successfully")
 
 

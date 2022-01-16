@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from pymodbus.constants import Endian
+
 from helpermodules import log
 from modules.common import modbus
 from modules.common import simcount
@@ -35,19 +37,19 @@ class CarloGavazziCounter:
             "Komponente "+self.component_config["name"]+" auslesen.")
 
         voltages = [val / 10 for val in self.__tcp_client.read_input_registers(
-            0x00, [ModbusDataType.INT_32] * 3, unit=unit)]
+            0x00, [ModbusDataType.INT_32] * 3, wordorder=Endian.Little, unit=unit)]
         powers = [val / 10 for val in self.__tcp_client.read_input_registers(
-            0x12, [ModbusDataType.INT_32] * 3, unit=unit)]
-        power_all = sum(powers)
+            0x12, [ModbusDataType.INT_32] * 3, wordorder=Endian.Little, unit=unit)]
+        power = sum(powers)
         currents = [abs(val / 1000) for val in self.__tcp_client.read_input_registers(
-            0x0C, [ModbusDataType.INT_32] * 3, unit=unit)]
+            0x0C, [ModbusDataType.INT_32] * 3, wordorder=Endian.Little, unit=unit)]
         frequency = self.__tcp_client.read_input_registers(0x33, ModbusDataType.INT_16, unit=unit) / 10
         if frequency > 100:
             frequency = frequency / 10
 
         topic_str = "openWB/set/system/device/{}/component/{}/".format(self.__device_id, self.component_config["id"])
         imported, exported = self.__sim_count.sim_count(
-            power_all,
+            power,
             topic=topic_str,
             data=self.__simulation,
             prefix="bezug"
@@ -59,8 +61,8 @@ class CarloGavazziCounter:
             powers=powers,
             imported=imported,
             exported=exported,
-            power_all=power_all,
+            power=power,
             frequency=frequency
         )
-        log.MainLogger().debug("Carlo Gavazzi Leistung[W]: " + str(counter_state.power_all))
+        log.MainLogger().debug("Carlo Gavazzi Leistung[W]: " + str(counter_state.power))
         self.__store.set(counter_state)

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Union, List
 
 from helpermodules import log
 from helpermodules.cli import run_using_positional_cli_args
 from modules.common.abstract_device import AbstractDevice
 from modules.common.component_context import MultiComponentUpdateContext
 from modules.fronius import bat
-from modules.fronius import counter_sm
 from modules.fronius import counter_s0
+from modules.fronius import counter_sm
 from modules.fronius import inverter
 from modules.fronius import meter
 
@@ -88,7 +88,7 @@ class Device(AbstractDevice):
                         break
                     elif isinstance(self._components[component], counter_s0.FroniusS0Counter):
                         counter_state = self._components[component].update(self.bat_configured)
-                        counter_state.power_all += power_inverter
+                        counter_state.power += power_inverter
                         self._components[component].set_counter_state(counter_state)
                         break
                 for component in self._components:
@@ -105,10 +105,9 @@ def read_legacy(
         component_type: str,
         ip_address: str,
         meter_id: int,
-        gen24: bool,
+        gen24: int,
         variant: int,
-        primo: bool = False,
-        meter_location: str = meter.MeterLocation.grid,
+        meter_location: int = meter.MeterLocation.grid.value,
         ip_address2: str = "none",
         bat_module: str = "none",
         num: Optional[int] = None) -> None:
@@ -125,16 +124,12 @@ def read_legacy(
     dev = Device(device_config)
     if component_type in COMPONENT_TYPE_TO_MODULE:
         component_config = COMPONENT_TYPE_TO_MODULE[component_type].get_default_config()
-        if component_type == "bat":
-            device_config["configuration"]["gen24"] = gen24
-        elif component_type == "counter_s0":
-            component_config["primo"] = primo
-        elif component_type == "counter_sm":
-            component_config["variant"] = variant
-            component_config["meter_location"] = meter_location
+        if component_type == "counter_sm":
+            component_config["configuration"]["variant"] = variant
+            component_config["configuration"]["meter_location"] = meter_location
         elif component_type == "inverter":
-            component_config["ip_address2"] = ip_address2
-            device_config["configuration"]["gen24"] = gen24
+            component_config["configuration"]["ip_address2"] = ip_address2
+            component_config["configuration"]["gen24"] = bool(gen24)
             if bat_module == "speicher_fronius":
                 dev.bat_configured = True
     else:
@@ -150,8 +145,5 @@ def read_legacy(
     dev.update()
 
 
-if __name__ == "__main__":
-    try:
-        run_using_positional_cli_args(read_legacy)
-    except Exception:
-        log.MainLogger().exception("Fehler im Fronius Skript")
+def main(argv: List[str]) -> None:
+    run_using_positional_cli_args(read_legacy, argv)
