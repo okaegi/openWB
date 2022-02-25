@@ -83,7 +83,7 @@
 										<option <?php if($pvwattmodulold == "wr_rct") echo "selected" ?> value="wr_rct">RCT</option>
 										<option <?php if($pvwattmodulold == "wr_rct2") echo "selected" ?> value="wr_rct2">RCT V.2</option>
 										<option <?php if($pvwattmodulold == "wr_siemens") echo "selected" ?> value="wr_siemens">Siemens Speicher</option>
-										<option <?php if($pvwattmodulold == "smaemd_pv") echo "selected" ?> value="smaemd_pv">SMA Energy Meter</option>
+										<option <?php if($pvwattmodulold == "wr_smashm") echo "selected" ?> value="wr_smashm">SMA Energy Meter</option>
 										<option <?php if($pvwattmodulold == "wr_tripower9000") echo "selected" ?> value="wr_tripower9000">SMA ModbusTCP WR</option>
 										<option <?php if($pvwattmodulold == "wr_smartme") echo "selected" ?> value="wr_smartme">SmartMe</option>
 										<option <?php if($pvwattmodulold == "wr_solaredge") echo "selected" ?> value="wr_solaredge">SolarEdge WR</option>
@@ -117,7 +117,7 @@
 							<div class="alert alert-info">
 								Keine Konfiguration erforderlich.<br>
 								Per MQTT zu schreiben:<br>
-								<span class="text-info">openWB/set/pv/1/W</span> PV-Leistung in Watt, int, negativ<br>
+								<span class="text-info">openWB/set/pv/1/W</span> PV-Erzeugungsleistung in Watt, int, positiv<br>
 								<span class="text-info">openWB/set/pv/1/WhCounter</span> Erzeugte Energie in Wh, float, nur positiv
 							</div>
 						</div>
@@ -147,6 +147,11 @@
 						<div id="pvsolarwatt" class="hide">
 							<div class="card-text alert alert-info">
 								Konfiguration im zugehörigen Speichermodul des Solarwatt/My Reserve erforderlich.
+							</div>
+						</div>
+						<div id="pvhuawei" class="hide">
+							<div class="card-text alert alert-danger">
+								Die Abfrage der Huawei Wechselrichter benötigt sehr viel Zeit. Es wird empfohlen das Regelintervall auf "langsam" zu stellen.
 							</div>
 						</div>
 						<div id="pvip" class="hide">
@@ -268,7 +273,7 @@
 								<div class="col">
 									<input class="form-control" type="text" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])|[a-zA-Z0-9.\-_]+$" name="solarview_hostname" id="solarview_hostname" value="<?php echo $solarview_hostnameold ?>">
 									<span class="form-text small">
-										Gültige Werte Hostname oder IP-Adresse.
+										Gültige Werte: Hostname oder IP-Adresse
 									</span>
 								</div>
 							</div>
@@ -277,7 +282,25 @@
 								<div class="col">
 									<input class="form-control" type="number" name="solarview_port" id="solarview_port" value="<?php echo htmlspecialchars($solarview_portold) ?>">
 									<span class="form-text small">
-										Gültige Werte Port, z.B. 15000.
+										Gültige Werte: Port, z.B. 15000
+									</span>
+								</div>
+							</div>
+							<div class="form-row mb-1">
+								<label for="solarview_timeout" class="col-md-4 col-form-label">Timeout für den Solarview TCP-Server</label>
+								<div class="col">
+									<input class="form-control" type="number" name="solarview_timeout" id="solarview_timeout" value="<?php echo htmlspecialchars($solarview_timeoutold) ?>">
+									<span class="form-text small">
+										Gültige Werte: Dauer in Sekunden, z.B. 3
+									</span>
+								</div>
+							</div>
+							<div class="form-row mb-1">
+								<label for="solarview_command_wr" class="col-md-4 col-form-label">Kommando für die Abfrage der Wechselrichter</label>
+								<div class="col">
+								<input class="form-control" type="text" pattern="^\d{2}\*$" name="solarview_command_wr" id="solarview_command_wr" value="<?php echo $solarview_command_wrold ?>">
+									<span class="form-text small">
+										Gültige Werte: Kommandos gemäß SolarView-Dokumentation, z.B.: <code>00*</code> (gesamte Anlage), <code>01*</code> (Wechselrichter 1), <code>02*</code> (Wechselrichter 2)
 									</span>
 								</div>
 							</div>
@@ -546,9 +569,9 @@
 							<div class="form-row mb-1">
 								<label for="solaredgepvip" class="col-md-4 col-form-label">WR Solaredge IP</label>
 								<div class="col">
-									<input class="form-control" type="text" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" name="solaredgepvip" id="solaredgepvip" value="<?php echo $solaredgepvipold ?>">
+									<input class="form-control" type="text" name="solaredgepvip" id="solaredgepvip" value="<?php echo $solaredgepvipold ?>">
 									<span class="form-text small">
-										Gültige Werte: IP Adresse des SolarEdge Wechselrichters. Modbus TCP muss am WR aktiviert werden, der Port ist auf 502 zu stellen.
+										Gültige Werte: <code>adresse</code> oder <code>adresse:port</code>. Wenn nicht angegeben wird port 502 verwendet. Modbus TCP muss am WR aktiviert sein.
 									</span>
 								</div>
 							</div>
@@ -817,7 +840,7 @@
 								<div class="col">
 									<input class="form-control" type="text" name="wr_http_w_url" id="wr_http_w_url" value="<?php echo htmlspecialchars($wr_http_w_urlold) ?>">
 									<span class="form-text small">
-										Gültige Werte vollständige URL. Die abgerufene Url muss eine reine Zahl zurückgeben. Enthält der Rückgabewert etwas anderes als wird der Wert auf null gesetzt. Der Wert muss in Watt sein.
+										Gültige Werte vollständige URL. Die abgerufene Url muss eine reine Zahl zurückgeben. Enthält der Rückgabewert etwas anderes, wird der Wert auf "0" gesetzt. Der Wert muss in Watt sein. Erzeugungsleistung muss positiv angegeben werden!
 									</span>
 								</div>
 							</div>
@@ -882,6 +905,7 @@
 								hideSection('#pvsungrow');
 								hideSection('#pvalphaess');
 								hideSection('#pvsonneneco');
+								hideSection('#pvhuawei');
 								if($('#pvwattmodul').val() == 'wr_siemens') {
 									showSection('#pvip');
 									showSection('#pvsiemens');
@@ -890,6 +914,7 @@
 									showSection('#pvip');
 								}
 								if($('#pvwattmodul').val() == 'wr_huawei') {
+									showSection('#pvhuawei');
 									showSection('#pvip');
 									showSection('#pvid');
 								}
@@ -950,7 +975,7 @@
 								if($('#pvwattmodul').val() == 'wr_http') {
 									showSection('#pvhttp');
 								}
-								if($('#pvwattmodul').val() == 'smaemd_pv') {
+								if($('#pvwattmodul').val() == 'wr_smashm') {
 									showSection('#pvsma');
 								}
 								if($('#pvwattmodul').val() == 'wr_json') {
@@ -1184,7 +1209,7 @@
 							<div class="alert alert-info">
 								Keine Konfiguration erforderlich.<br>
 								Per MQTT zu schreiben:<br>
-								<span class="text-info">openWB/set/pv/2/W</span> PV-Leistung in Watt, int, negativ<br>
+								<span class="text-info">openWB/set/pv/2/W</span> PV-Erzeugungsleistung in Watt, int, positiv<br>
 								<span class="text-info">openWB/set/pv/2/WhCounter</span> Erzeugte Energie in Wh, float, nur positiv
 							</div>
 						</div>

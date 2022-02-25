@@ -203,8 +203,8 @@
 							</div>
 						</div>
 						<div id="wattbezughuawei" class="hide">
-							<div class="card-text alert alert-info">
-								Konfiguration erfolgt im zugehörigen PV Modul.
+							<div class="card-text alert alert-danger">
+								Es muss zwingend auch das Huawei PV Modul konfiguriert werden, da alle Daten dort abgerufen werden!
 							</div>
 						</div>
 
@@ -308,11 +308,26 @@
 									</span>
 								</div>
 							</div>
+							<div class="form-group">
+								<div class="form-row mb-1">
+									<label class="col-md-4 col-form-label">Messgerät</label>
+									<div class="col">
+										<div class="btn-group btn-group-toggle btn-block" data-toggle="buttons">
+											<label class="btn btn-outline-info<?php if($victron_energy_meterold == 1) echo " active" ?>">
+												<input type="radio" name="victron_energy_meter" id="victron_energy_meterOn" value="1"<?php if($victron_energy_meterold == 1) echo " checked=\"checked\"" ?>>Energy Meter
+											</label>
+											<label class="btn btn-outline-info<?php if($victron_energy_meterold == 0) echo " active" ?>">
+												<input type="radio" name="victron_energy_meter" id="victron_energy_meterOff" value="0"<?php if($victron_energy_meterold == 0) echo " checked=\"checked\"" ?>>AC-In Victron GX
+											</label>
+										</div>
+									</div>
+								</div>
+							</div>
 							<div class="form-row mb-1">
 								<label for="bezug_id" class="col-md-4 col-form-label">ID</label>
 								<div class="col">
 									<input class="form-control" type="text" name="bezug_id" id="bezug_id" value="<?php echo $bezug_idold ?>">
-									<span class="form-text small">Gültige Werte ID. ID Adresse</span>
+									<span class="form-text small">Gültige Werte ID. Modbus-ID</span>
 								</div>
 							</div>
 						</div>
@@ -1005,9 +1020,6 @@
 								}
 								if($('#wattbezugmodul').val() == 'bezug_http')   {
 									showSection('#wattbezughttp');
-								}
-								if($('#wattbezugmodul').val() == 'smaemd_bezug')   {
-									showSection('#wattbezugsma');
 								}
 								if($('#wattbezugmodul').val() == 'bezug_fronius_sm')   {
 									showSection('#wattbezugfronius');

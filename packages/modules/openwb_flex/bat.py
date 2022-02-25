@@ -13,11 +13,10 @@ def get_default_config() -> dict:
         "name": "Speicher-Kit flex",
         "type": "bat",
         "id": None,
-        "configuration":
-            {
-                "version": 2,
-                "id": 117
-            }
+        "configuration": {
+            "version": 2,
+            "id": 117
+        }
     }
 
 
@@ -37,7 +36,7 @@ class BatKitFlex:
         log.MainLogger().debug("Start kit reading")
         # TCP-Verbindung schließen möglichst bevor etwas anderes gemacht wird, um im Fehlerfall zu verhindern,
         # dass offene Verbindungen den Modbus-Adapter blockieren.
-        try:
+        with self.__tcp_client:
             imported = self.__client.get_imported()
             exported = self.__client.get_exported()
             if self.component_config["configuration"]["version"] == 2:
@@ -45,8 +44,7 @@ class BatKitFlex:
                 power = power * -1
             else:
                 _, power = self.__client.get_power()
-        finally:
-            self.__tcp_client.close_connection()
+
         bat_state = BatState(
             imported=imported,
             exported=exported,
