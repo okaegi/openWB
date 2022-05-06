@@ -71,8 +71,10 @@
 									</optgroup>
 									<optgroup label="andere Hersteller">
 										<option <?php if($pvwattmodulold == "wr_alphaess") echo "selected" ?> value="wr_alphaess">AlphaESS-Speicher</option>
+										<option <?php if($pvwattmodulold == "wr_batterx") echo "selected" ?> value="wr_batterx">BatterX</option>
 										<option <?php if($pvwattmodulold == "wr_discovergy") echo "selected" ?> value="wr_discovergy">Discovergy</option>
 										<option <?php if($pvwattmodulold == "wr_fronius") echo "selected" ?> value="wr_fronius">Fronius WR</option>
+										<option <?php if($pvwattmodulold == "wr_good_we") echo "selected" ?> value="wr_good_we">GoodWe</option>
 										<option <?php if($pvwattmodulold == "wr_huawei") echo "selected" ?> value="wr_huawei">Huawei</option>
 										<option <?php if($pvwattmodulold == "wr_kostalpiko") echo "selected" ?> value="wr_kostalpiko">Kostal Piko</option>
 										<option <?php if($pvwattmodulold == "wr_kostalpikovar2") echo "selected" ?> value="wr_kostalpikovar2">Kostal Piko alt</option>
@@ -130,6 +132,29 @@
 							</div>
 						</div>
 						<div id="pvalphaess" class="hide">
+							<div class="card-text alert alert-info">
+								Keine Konfiguration erforderlich.
+							</div>
+						</div>
+						<div id="pvgoodwe" class="hide">
+							<div class="form-group">
+								<div class="form-row mb-1">
+									<label for="good_we_ip" class="col-md-4 col-form-label">IP Adresse</label>
+									<div class="col">
+										<input class="form-control" type="text" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" name="good_we_ip" id="good_we_ip" value="<?php echo $good_we_ipold ?>">
+										<span class="form-text small">Gültige Werte IP Adresse im Format: 192.168.1.1</span>
+									</div>
+								</div>
+								<div class="form-row mb-1">
+									<label for="good_we_id" class="col-md-4 col-form-label">Unit ID</label>
+									<div class="col">
+										<input class="form-control" type="number" min="1" max="247" step="1" name="good_we_id" id="good_we_id" value="<?php echo $good_we_idold ?>">
+										<span class="form-text small">Gültige Werte 1-247. Standard-ID ist 247. Modbus ID des Gerätes.</span>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="pvbatterx" class="hide">
 							<div class="card-text alert alert-info">
 								Keine Konfiguration erforderlich.
 							</div>
@@ -916,6 +941,8 @@
 								hideSection('#pvwrstuder');
 								hideSection('#pvsungrow');
 								hideSection('#pvalphaess');
+								hideSection('#pvgoodwe');
+								hideSection('#pvbatterx');
 								hideSection('#pvsonneneco');
 								hideSection('#pvhuawei');
 								if($('#pvwattmodul').val() == 'wr_siemens') {
@@ -1036,6 +1063,12 @@
 								}
 								if($('#pvwattmodul').val() == 'wr_alphaess') {
 									showSection('#pvalphaess');
+								}
+								if($('#pvwattmodul').val() == 'wr_good_we') {
+									showSection('#pvgoodwe');
+								}
+								if($('#pvwattmodul').val() == 'wr_batterx') {
+									showSection('#pvbatterx');
 								}
 								if($('#pvwattmodul').val() == 'wr_sungrow') {
 									showSection('#pvsungrow');
