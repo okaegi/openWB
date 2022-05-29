@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
+import logging
 from typing import Dict, Optional, Union, List
 
-from helpermodules import log
 from helpermodules.cli import run_using_positional_cli_args
 from modules.common.store import get_inverter_value_store
 from modules.common.abstract_device import AbstractDevice
@@ -10,6 +10,9 @@ from modules.fronius import bat
 from modules.fronius import counter_s0
 from modules.fronius import counter_sm
 from modules.fronius import inverter
+from modules.fronius.abstract_config import Fronius
+
+log = logging.getLogger(__name__)
 
 
 def get_default_config() -> dict:
@@ -36,17 +39,19 @@ class Device(AbstractDevice):
     }
 
     def __init__(self, device_config: dict) -> None:
-        self._components = {}  # type: Dict[str, fronius_component_classes]
+        self.components = {}  # type: Dict[str, fronius_component_classes]
         try:
-            self.device_config = device_config
+            self.config = device_config \
+                if isinstance(device_config, Fronius) \
+                else Fronius.from_dict(device_config)
         except Exception:
-            log.MainLogger().exception("Fehler im Modul "+device_config["name"])
+            log.exception("Fehler im Modul "+device_config["name"])
 
     def add_component(self, component_config: dict) -> None:
         component_type = component_config["type"]
         if component_type in self.COMPONENT_TYPE_TO_CLASS:
-            self._components["component"+str(component_config["id"])] = self.COMPONENT_TYPE_TO_CLASS[component_type](
-                self.device_config["id"], component_config, self.device_config["configuration"])
+            self.components["component"+str(component_config["id"])] = self.COMPONENT_TYPE_TO_CLASS[component_type](
+                self.config.id, component_config, self.config.configuration)
         else:
             raise Exception(
                 "illegal component type " + component_type + ". Allowed values: " +
@@ -54,14 +59,14 @@ class Device(AbstractDevice):
             )
 
     def update(self) -> None:
-        log.MainLogger().debug("Start device reading " + str(self._components))
-        if self._components:
-            with MultiComponentUpdateContext(self._components):
-                for component in self._components:
-                    self._components[component].update()
+        log.debug("Start device reading " + str(self.components))
+        if self.components:
+            with MultiComponentUpdateContext(self.components):
+                for component in self.components:
+                    self.components[component].update()
         else:
-            log.MainLogger().warning(
-                self.device_config["name"] +
+            log.warning(
+                self.config.name +
                 ": Es konnten keine Werte gelesen werden, da noch keine Komponenten konfiguriert wurden."
             )
 
@@ -98,18 +103,17 @@ def read_legacy(
     component_config["id"] = num
     dev.add_component(component_config)
 
-    log.MainLogger().debug('Fronius IP-Adresse: ' + str(ip_address))
+    log.debug('Fronius IP-Adresse: ' + ip_address)
 
-    if component_type == "bat" and component_type == "counter":
+    if component_type == "bat" or "counter" in component_type:
         dev.update()
     elif component_type == "inverter" and num:
-        inverter1 = inverter.FroniusInverter(num, component_config, device_config)
-        if ip_address2 != "none":
-            device_config["configuration"]["ip_address"] = ip_address2
-            inverter2 = inverter.FroniusInverter(num, component_config, device_config)
+        inverter1 = inverter.FroniusInverter(num, component_config, dev.config.configuration)
         with SingleComponentUpdateContext(inverter1.component_info):
             total_power = inverter1.read_power()
             if ip_address2 != "none":
+                dev.config.configuration.ip_address = ip_address2
+                inverter2 = inverter.FroniusInverter(num, component_config, dev.config.configuration)
                 total_power += inverter2.read_power()
             get_inverter_value_store(num).set(inverter1.fill_inverter_state(total_power))
     else:
