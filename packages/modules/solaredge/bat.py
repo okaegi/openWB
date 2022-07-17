@@ -24,7 +24,7 @@ def get_default_config() -> dict:
 
 
 class SolaredgeBat:
-    def __init__(self, device_id: int, component_config: dict, tcp_client: modbus.ModbusClient) -> None:
+    def __init__(self, device_id: int, component_config: dict, tcp_client: modbus.ModbusTcpClient_) -> None:
         self.__device_id = device_id
         self.component_config = component_config
         self.__tcp_client = tcp_client
@@ -38,11 +38,10 @@ class SolaredgeBat:
 
     def read_state(self):
         unit = self.component_config["configuration"]["modbus_id"]
-        with self.__tcp_client:
-            soc = self.__tcp_client.read_holding_registers(
-                62852, ModbusDataType.FLOAT_32, wordorder=Endian.Little, unit=unit)
-            power = self.__tcp_client.read_holding_registers(
-                62836, ModbusDataType.FLOAT_32, wordorder=Endian.Little, unit=unit)
+        soc = self.__tcp_client.read_holding_registers(
+            62852, ModbusDataType.FLOAT_32, wordorder=Endian.Little, unit=unit)
+        power = self.__tcp_client.read_holding_registers(
+            62836, ModbusDataType.FLOAT_32, wordorder=Endian.Little, unit=unit)
 
         topic_str = "openWB/set/system/device/" + str(
             self.__device_id)+"/component/"+str(self.component_config["id"])+"/"

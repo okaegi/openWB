@@ -19,50 +19,57 @@ def get_default_config() -> dict:
 
 
 class SolaredgeCounter:
-    def __init__(self, device_id: int, component_config: dict, tcp_client: modbus.ModbusClient) -> None:
+    def __init__(self, device_id: int, component_config: dict, tcp_client: modbus.ModbusTcpClient_) -> None:
         self.component_config = component_config
         self.__tcp_client = tcp_client
         self.__store = get_counter_value_store(component_config["id"])
         self.component_info = ComponentInfo.from_component_config(component_config)
 
     def update(self):
-        with self.__tcp_client:
-            def read_scaled_int16(address: int, count: int):
-                return scale_registers(
-                    self.__tcp_client.read_holding_registers(
-                        address,
-                        [ModbusDataType.INT_16] * (count+1),
-                        unit=self.component_config["configuration"]["modbus_id"])
-                )
+        def read_scaled_int16(address: int, count: int):
+            return scale_registers(
+                self.__tcp_client.read_holding_registers(
+                    address,
+                    [ModbusDataType.INT_16] * (count+1),
+                    unit=self.component_config["configuration"]["modbus_id"])
+            )
 
-            # 40206: Total Real Power (sum of active phases)
-            # 40206/40207/40208: Real Power by phase
-            # 40210: AC Real Power Scale Factor
-            powers = [-power for power in read_scaled_int16(40206, 4)]
+        def read_scaled_uint32(address: int, count: int):
+            return scale_registers(
+                self.__tcp_client.read_holding_registers(
+                    address,
+                    [ModbusDataType.UINT_32] * (count)+[ModbusDataType.INT_16],
+                    unit=self.component_config["configuration"]["modbus_id"])
+            )
 
-            # 40191/40192/40193: AC Current by phase
-            # 40194: AC Current Scale Factor
-            currents = read_scaled_int16(40191, 3)
+        # 40206: Total Real Power (sum of active phases)
+        # 40207/40208/40209: Real Power by phase
+        # 40210: AC Real Power Scale Factor
+        powers = [-power for power in read_scaled_int16(40206, 4)]
 
-            # 40196/40197/40198: Voltage per phase
-            # 40203: AC Voltage Scale Factor
-            voltages = read_scaled_int16(40196, 7)[:3]
+        # 40191/40192/40193: AC Current by phase
+        # 40194: AC Current Scale Factor
+        currents = read_scaled_int16(40191, 3)
 
-            # 40204: AC Frequency
-            # 40205: AC Frequency Scale Factor
-            frequency = read_scaled_int16(40204, 1)[0]
+        # 40196/40197/40198: Voltage per phase
+        # 40203: AC Voltage Scale Factor
+        voltages = read_scaled_int16(40196, 7)[:3]
 
-            # 40222/40223/40224: Power factor by phase (unit=%)
-            # 40225: AC Power Factor Scale Factor
-            power_factors = [power_factor / 100 for power_factor in read_scaled_int16(40222, 3)]
+        # 40204: AC Frequency
+        # 40205: AC Frequency Scale Factor
+        frequency = read_scaled_int16(40204, 1)[0]
 
-            # 40234: Total Imported Real Energy
-            counter_imported = self.__tcp_client.read_holding_registers(
-                40234, ModbusDataType.UINT_32, unit=self.component_config["configuration"]["modbus_id"])
+        # 40222/40223/40224: Power factor by phase (unit=%)
+        # 40225: AC Power Factor Scale Factor
+        power_factors = [power_factor / 100 for power_factor in read_scaled_int16(40222, 3)]
 
-            # 40226: Total Exported Real Energy
-            counter_exported = self.__tcp_client.read_holding_registers(
-                40226, ModbusDataType.UINT_32, unit=self.component_config["configuration"]["modbus_id"])
+        # 40226: Total Exported Real Energy
+        # 40228/40230/40232: Total Exported Real Energy Phase (not used)
+        # 40234: Total Imported Real Energy
+        # 40236/40238/40240: Total Imported Real Energy Phase (not used)
+        # 40242: Real Energy Scale Factor
+        counter_values = read_scaled_uint32(40226, 8)
+        counter_exported, counter_imported = [counter_values[i] for i in [0, 4]]
 
         counter_state = CounterState(
             imported=counter_imported,
