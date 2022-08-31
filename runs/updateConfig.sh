@@ -1851,6 +1851,9 @@ updateConfig(){
 			echo "pv2id2=0"
 		} >> $ConfigFile
 	fi
+	if ! grep -Fq "pv2port=" $ConfigFile; then
+		echo "pv2port=502" >> $ConfigFile
+	fi
 	if ! grep -Fq "pv2ip=" $ConfigFile; then
 		{
 			echo "pv2ip=none"
@@ -2204,6 +2207,10 @@ updateConfig(){
 	if ! grep -Fq "sungrowsr=" $ConfigFile; then
 		echo "sungrowsr=0" >> $ConfigFile
 	fi
+	if ! grep -Fq "sungrowspeicherport=" $ConfigFile; then
+		echo "sungrowspeicherport=502" >> $ConfigFile
+		echo "sungrowspeicherid=1" >> $ConfigFile
+	fi
 	if ! grep -Fq "alphasource=" $ConfigFile; then
 		echo "alphasource=0" >> $ConfigFile
 	fi
@@ -2275,6 +2282,14 @@ updateConfig(){
 			echo "wrsmaversion=0"
 			echo "wr2smaversion=0"
 		} >> $ConfigFile
+	fi
+
+	# replace obsolete soc_id configuration by soc_vwid
+	if grep -Fq "socmodul=soc_id" $ConfigFile; then
+		sed -i "s/^socmodul=soc_id/socmodul=soc_vwid/g" $ConfigFile
+	fi
+	if grep -Fq "socmodul1=soc_idlp2" $ConfigFile; then
+		sed -i "s/^socmodul1=soc_idlp2/socmodul=soc_vwidlp2/g" $ConfigFile
 	fi
 
 	echo "Config file Update done."
