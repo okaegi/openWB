@@ -1132,7 +1132,7 @@ loadvars(){
 	if [[ $speichermodul == "speicher_kostalplenticore" ]] && [[ $pvwattmodul == "wr_plenticore" ]]; then
 		usesimpv=1
 	fi
-	if [[ $pvwattmodul == "wr_rct" ]]|| [[ $pvwattmodul == "wr_solarwatt" ]] || [[ $pvwattmodul == "wr_shelly" ]] || [[ $pvwattmodul == "wr_kostalpikovar2" ]]; then
+	if [[ $pvwattmodul == "wr_rct" ]]|| [[ $pvwattmodul == "wr_solarwatt" ]] || [[ $pvwattmodul == "wr_kostalpikovar2" ]]; then
 		usesimpv=1
 	fi
 	if ((usesimpv == 1)); then
@@ -1172,44 +1172,6 @@ loadvars(){
 	fi
 	#simcount für wr2
 	usesimpv2=0
-	if [[ $pv2wattmodul == "wr2_shelly" ]]; then
-		usesimpv2=1
-	fi
-	if ((usesimpv2 == 1)); then
-		ra='^-?[0-9]+$'
-		#rechnen auf wr2
-		watt4=$(</var/www/html/openWB/ramdisk/pv2watt)
-		if [[ -e /var/www/html/openWB/ramdisk/pv2watt0pos ]]; then
-			importtemp=$(</var/www/html/openWB/ramdisk/pv2watt0pos)
-		else
-			importtemp=$(timeout 4 mosquitto_sub -t openWB/pv/WH2Imported_temp)
-			if ! [[ $importtemp =~ $ra ]] ; then
-				importtemp="0"
-			fi
-			openwbDebugLog "MAIN" 0 "loadvars read openWB/pv/WH2Imported_temp from mosquito $importtemp"
-			echo $importtemp > /var/www/html/openWB/ramdisk/pv2watt0pos
-		fi
-		if [[ -e /var/www/html/openWB/ramdisk/pv2watt0neg ]]; then
-			exporttemp=$(</var/www/html/openWB/ramdisk/pv2watt0neg)
-		else
-			exporttemp=$(timeout 4 mosquitto_sub -t openWB/pv/WH2Export_temp)
-			if ! [[ $exporttemp =~ $ra ]] ; then
-				exporttemp="0"
-			fi
-			openwbDebugLog "MAIN" 0 "loadvars read openWB/pv/WH2Export_temp from mosquito $exporttemp"
-			echo $exporttemp > /var/www/html/openWB/ramdisk/pv2watt0neg
-		fi
-		sudo python /var/www/html/openWB/runs/simcount.py "$watt4" pv2 pv2poskwh pv2kwh
-		importtemp1=$(</var/www/html/openWB/ramdisk/pv2watt0pos)
-		exporttemp1=$(</var/www/html/openWB/ramdisk/pv2watt0neg)
-		if [[ $importtemp !=  "$importtemp1" ]]; then
-			mosquitto_pub -t openWB/pv/WH2Imported_temp -r -m "$importtemp1"
-		fi
-		if [[ $exporttemp !=  "$exporttemp1" ]]; then
-			mosquitto_pub -t openWB/pv/WH2Export_temp -r -m "$exporttemp1"
-		fi
-		# sim pv2 end
-	fi
 	#addition Zaehler pv1 und pv2 nach Simcount
 	if ((pv2vorhanden == 1)); then
 		pvkwh=$(</var/www/html/openWB/ramdisk/pvkwh)
@@ -1867,6 +1829,14 @@ loadvars(){
 	mqttconfvar["config/get/sofort/lp/6/chargeLimitation"]=msmoduslp6
 	mqttconfvar["config/get/sofort/lp/7/chargeLimitation"]=msmoduslp7
 	mqttconfvar["config/get/sofort/lp/8/chargeLimitation"]=msmoduslp8
+	mqttconfvar["config/get/sofort/lp/1/etBasedCharging"]=lp1etbasedcharging
+	mqttconfvar["config/get/sofort/lp/2/etBasedCharging"]=lp2etbasedcharging
+	mqttconfvar["config/get/sofort/lp/3/etBasedCharging"]=lp3etbasedcharging
+	mqttconfvar["config/get/sofort/lp/4/etBasedCharging"]=lp4etbasedcharging
+	mqttconfvar["config/get/sofort/lp/5/etBasedCharging"]=lp5etbasedcharging
+	mqttconfvar["config/get/sofort/lp/6/etBasedCharging"]=lp6etbasedcharging
+	mqttconfvar["config/get/sofort/lp/7/etBasedCharging"]=lp7etbasedcharging
+	mqttconfvar["config/get/sofort/lp/8/etBasedCharging"]=lp8etbasedcharging
 	mqttconfvar["config/get/pv/lp/1/socLimitation"]=stopchargepvatpercentlp1
 	mqttconfvar["config/get/pv/lp/2/socLimitation"]=stopchargepvatpercentlp2
 	mqttconfvar["config/get/pv/lp/1/maxSoc"]=stopchargepvpercentagelp1

@@ -640,6 +640,12 @@ def on_message(client, userdata, msg):
                     client.publish("openWB/config/get/sofort/lp/"+str(devicenumb)+"/socToChargeTo", msg.payload.decode("utf-8"), qos=0, retain=True)
                     sendcommand = ["/var/www/html/openWB/runs/replaceinconfig.sh", "sofortsoclp"+str(devicenumb)+"=", msg.payload.decode("utf-8")]
                     subprocess.run(sendcommand)
+            if (( "openWB/config/set/sofort/lp" in msg.topic) and ("etBasedCharging" in msg.topic)):
+                devicenumb=re.sub(r'\D', '', msg.topic)
+                if ( 1 <= int(devicenumb) <= 8 and 0 <= int(msg.payload) <= 1):
+                    client.publish("openWB/config/get/sofort/lp/"+str(devicenumb)+"/etBasedCharging", msg.payload.decode("utf-8"), qos=0, retain=True)
+                    sendcommand = ["/var/www/html/openWB/runs/replaceinconfig.sh", "lp"+str(devicenumb)+"etbasedcharging=", msg.payload.decode("utf-8")]
+                    subprocess.run(sendcommand)
             if (( "openWB/config/set/sofort/lp" in msg.topic) and ("chargeLimitation" in msg.topic)):
                 devicenumb=re.sub(r'\D', '', msg.topic)
                 if ( 3 <= int(devicenumb) <= 8 and 0 <= int(msg.payload) <= 1):
@@ -948,7 +954,7 @@ def on_message(client, userdata, msg):
                 f.close()
                 setTopicCleared = True
             if (msg.topic == "openWB/set/configure/TotalPower"):
-                if (float(msg.payload) >= 0 and float(msg.payload) <=300000):
+                if (float(msg.payload) >= 0 and float(msg.payload) <= 999999):
                     f = open('/var/www/html/openWB/ramdisk/TotalPower', 'w')
                     f.write(msg.payload.decode("utf-8"))
                     f.close()
