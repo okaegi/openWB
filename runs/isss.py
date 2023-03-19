@@ -81,8 +81,9 @@ class UpdateValues:
         def pub_value(topic: str, value):
             pub_single("openWB/lp/"+str(self.local_charge_point_num+1) +
                        "/"+topic, payload=str(value), no_json=True)
-            pub_single("openWB/lp/"+self.cp_num_str+"/"+topic,
-                       payload=str(value), hostname=self.parent_wb, no_json=True)
+            if self.parent_wb != "localhost":
+                pub_single("openWB/lp/"+self.cp_num_str+"/"+topic,
+                           payload=str(value), hostname=self.parent_wb, no_json=True)
         topic = self.MAP_KEY_TO_OLD_TOPIC[key]
         rounding = get_rounding_function_by_digits(2)
         if topic is not None:
@@ -240,11 +241,14 @@ class Isss:
 
     def detect_modbus_usb_port(self) -> str:
         """guess USB/modbus device name"""
-        try:
-            with open("/dev/ttyUSB0"):
-                return "/dev/ttyUSB0"
-        except FileNotFoundError:
-            return "/dev/serial0"
+        known_devices = ("/dev/ttyUSB0", "/dev/ttyACM0", "/dev/serial0")
+        for device in known_devices:
+            try:
+                with open(device):
+                    return device
+            except FileNotFoundError:
+                pass
+        return known_devices[-1]  # this does not make sense, but is the same behavior as the old code
 
     @staticmethod
     def get_cp_num(local_charge_point_num: int) -> int:
