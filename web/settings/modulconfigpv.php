@@ -158,7 +158,20 @@
 						</div>
 						<div id="pvbatterx" class="hide">
 							<div class="card-text alert alert-info">
-								Keine Konfiguration erforderlich.
+								Konfiguration der IP-Adresse im BatterX-Zähler.
+							</div>
+							<div class="form-row mb-1">
+								<label class="col-md-4 col-form-label">Externer Wechselrichter</label>
+								<div class="col">
+									<div class="btn-group btn-group-toggle btn-block" data-toggle="buttons">
+										<label class="btn btn-outline-info<?php if($pvbatterxextinverterold == 0) echo " active" ?>">
+											<input type="radio" name="pvbatterxextinverter" id="pvbatterxextinverterNo" value="0"<?php if($pvbatterxextinverterold == 0) echo " checked=\"checked\"" ?>>Nein
+										</label>
+										<label class="btn btn-outline-info<?php if($wryoulessaltold == 1) echo " active" ?>">
+											<input type="radio" name="pvbatterxextinverter" id="pvbatterxextinverterYes" value="1"<?php if($pvbatterxextinverterold == 1) echo " checked=\"checked\"" ?>>Ja
+										</label>
+									</div>
+								</div>
 							</div>
 						</div>
 						<div id="pvsungrow" class="hide">
@@ -179,6 +192,22 @@
 								<span class="form-text small">
 								Gültige Werte der Geräteadresse 1-254. Standard ist 1.
 								</span>
+							</div>
+							<div class="form-group">
+								<div class="form-row mb-1">
+									<label for="speicher1_ip" class="col-md-4 col-form-label">IP Adresse</label>
+									<div class="col">
+										<input class="form-control" type="text" pattern="^((\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.){3}(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$" name="speicher1_ip" id="speicher1_ip" value="<?php echo $speicher1_ipold ?>">
+										<span class="form-text small">Gültige Werte IP Adresse im Format: 192.168.0.12</span>
+									</div>
+								</div>
+							</div>
+							<div class="form-row mb-1">
+								<label for="sungrowspeicherid" class="col-md-4 col-form-label">Geräteadresse</label>
+								<div class="col">
+									<input class="form-control" type="number" min="1" max="254" step="1" name="sungrowspeicherid" id="sungrowspeicherid" value="<?php echo $sungrowspeicheridold ?>">
+									<span class="form-text small">Gültige Werte 1-254. Standard ist 1.</span>
+								</div>
 							</div>
 						</div>
 						<div id="pvlgessv1" class="hide">
@@ -596,6 +625,7 @@
 									<select name="wrsmaversion" id="wrsmaversion" class="form-control">
 										<option <?php if($wrsmaversionold == 0) echo "selected" ?> value="0">Standard</option>
 										<option <?php if($wrsmaversionold == 1) echo "selected" ?> value="1">Core-2</option>
+										<option <?php if($wrsmaversionold == 2) echo "selected" ?> value="2">Data Manager/Cluster Controller</option>
 									</select>
 								</div>
 							</div>
@@ -1133,8 +1163,6 @@
 									showSection('#pvbatterx');
 								}
 								if($('#pvwattmodul').val() == 'wr_sungrow') {
-									showSection('#pvip');
-									showSection('#pvid');
 									showSection('#pvsungrow');
 								}
 								if($('#pvwattmodul').val() == 'wr_sonneneco') {
